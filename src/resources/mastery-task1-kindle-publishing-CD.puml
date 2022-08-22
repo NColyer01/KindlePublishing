@@ -1,0 +1,102 @@
+PARTICIPANTS: use this file for creating the class diagram in mastery task 01
+@startuml
+class GetBookActivity {
+- recommendationServiceClient : RecommendationsServiceClient
+- catalogDao : CatalogDao
++ execute(GetBookRequest request) : GetBookResponse
+}
+
+class GetPublishingStatusActivity {
++ execute(GetPublishingStatusRequest request) : GetPublishingStatusResponse
+}
+
+class RemoveBookFromCatalogActivity {
++ execute(RemoveBookFromCatalogRequest request) : RemoveBookFromCatalogResponse
+}
+
+class SubmitBookForPublishingActivity {
+- publishingStatusDao : PublishingStatusDao
++ execute(SubmitBookForPublishingRequest request) : SubmitBookForPublishingResponse
+}
+
+class RecommendationsServiceClient {
+- recommendationsService : RecommendationsService
++ getBookRecommendations(BookGenre genre) : List<BookRecommendation>
+}
+
+class CatalogDao {
+- dynamoDBMapper : DynamoDBMapper
++ getBookFromCatalog(String bookId) : CatalogItemVersion
+}
+
+class PublishingStatusDao {
+- dynamoDBMapper : DynamoDBMapper
++ setPublishingStatus(String publishingRecordId, PublishingRecordStatus publishingRecordStatus,
+String bookId) : PublishingStatusItem
++setPublishingStatus(String publishingRecordId, PublishingRecordStatus publishingRecordStatus,
+String bookId, String message) : PublishingStatusItem
+}
+
+class CatalogItemVersion {
+- @DynamoDBHashKey bookId : String
+- @DynamoDBRangeKey version : int
+- inactive : boolean
+- title : String
+- author : String
+- text : String
+- genre : BookGenre
++ getBookId() : String
++ setBookId(String bookId)
++ getVersion() : int
++ setVersion(int version)
++ getTitle() : String
++ setTitle(String title)
++ getAuthor() : String
++ setAuthor(String author)
++ getText() : String
++ setText(String text)
++ getGenre() : BookGenre
++ setGenre(BookGenre genre)
++ isInactive() : boolean
++ setInactive(boolean active)
+
+}
+
+class PublishingStatusItem {
+- @DynamoDBHashKey publishingRecordId : String
+- @DynamoDBRangeKey status : PublishingRecordStatus
+- statusMessage : String
+- bookId : String
++ getPublishingRecordId() : String
++ setPublishingRecordId(String publishingRecordId)
++ getStatus() : PublishingRecordStatus
++ setStatus(PublishingRecordStatus status)
++ getStatusMessage() : String
++ setStatusMessage(String statusMessage)
++ getBookId() : String
++ setBookId(String bookId)
+}
+
+class BookNotFoundException {
+
+}
+
+class PublishingStatusNotFoundException {
+
+}
+
+RuntimeException --> BookNotFoundException
+RuntimeException --> PublishingStatusNotFoundException
+CatalogDao --> BookNotFoundException
+GetBookRequest --> GetBookActivity
+GetBookActivity --> RecommendationsServiceClient
+GetBookActivity --> CatalogDao
+CatalogItemVersion --> CatalogDao
+PublishingStatusItem --> PublishingStatusDao
+SubmitBookForPublishingActivity --> PublishingStatusDao
+PublishingStatusItem --> PublishingRecordStatus
+
+RecommendationsServiceClient --> RecommendationsService
+
+GetPublishingStatusActivity --> PublishingStatusRequest
+@enduml
